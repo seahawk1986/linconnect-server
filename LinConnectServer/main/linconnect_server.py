@@ -130,7 +130,9 @@ class Notification(object):
                 notif.set_timeout(parser.getint('other', 'notify_timeout'))
             try:
                 vdr = DBus2VDR(modules=['Skin'])
-                vdr.Skin.QueueMessage(" + {header} | {message} +".format(header=_notification_header, message=_notification_description))
+                vdr.Skin.QueueMessage("{header} | {message}".format(header=_notification_header,
+                                                                    message=_notification_description)
+                                      )
             except Exception as error:
                 print(error)
                 
