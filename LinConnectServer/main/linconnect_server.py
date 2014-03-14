@@ -24,6 +24,7 @@ try:
     import ConfigParser
 except ImportError:
     import configparser as ConfigParser
+
 import os
 import sys
 import select
@@ -35,6 +36,9 @@ import subprocess
 from gi.repository import Notify
 import pybonjour
 import shutil
+
+import dbus
+from dbus2vdr import DBus2VDR
 
 app_name = 'linconnect-server'
 version = "3"
@@ -125,12 +129,11 @@ class Notification(object):
             if parser.has_option('other', 'notify_timeout'):
                 notif.set_timeout(parser.getint('other', 'notify_timeout'))
             try:
-                notif.show()
-            except:
-                # Workaround for org.freedesktop.DBus.Error.ServiceUnknown
-                Notify.uninit()
-                Notify.init("com.willhauck.linconnect")
-                notif.show()
+                vdr = DBus2VDR(modules=['Skin'])
+                vdr.Skin.QueueMessage(" + {header} | {message} +".format(header=_notification_header, message=_notification_description))
+            except Exception as error:
+                print(error)
+                
 
         return "true"
     notif.exposed = True
@@ -177,7 +180,7 @@ if parser.getboolean('connection', 'enable_bonjour') == 1:
 config_instructions = "Configuration instructions at http://localhost:" + parser.get('connection', 'port')
 print(config_instructions)
 notif = Notify.Notification.new("Notification server started", config_instructions, "info")
-notif.show()
+#notif.show()
 
 cherrypy.server.socket_host = '0.0.0.0'
 cherrypy.server.socket_port = int(parser.get('connection', 'port'))
